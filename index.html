@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SafeLink AI — All-in-One Prototype</title>
+  <style>
+    :root { --accent:#3498db; --bg:#f5f6fa; --card:#ffffff; --muted:#6c7a89; }
+    body { font-family: Arial, sans-serif; margin:0; background:var(--bg); color:#222; }
+    header { background: #2c3e50; color: white; padding:14px 16px; text-align:center; font-size:20px; }
+    .container { max-width:900px; margin:18px auto; padding:12px; }
+    nav { text-align:center; margin-bottom:12px; }
+    nav button { margin:6px; padding:10px 14px; border-radius:8px; border:none; background:var(--accent); color:#fff; cursor:pointer; }
+    .grid { display:grid; grid-template-columns: 1fr; gap:12px; }
+    .card { background:var(--card); padding:14px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+    input[type="text"]{ width:70%; padding:10px; border-radius:8px; border:1px solid #ddd; }
+    select { padding:9px; border-radius:8px; border:1px solid #ddd; }
+    button.small { padding:8px 10px; margin-left:6px; }
+    .slogan { font-weight:700; color:#16a085; margin-bottom:8px; }
+    .helpline p{ margin:6px 0; color:var(--muted); }
+    .reports-list, .leaderboard-list { max-height:160px; overflow:auto; border:1px dashed #eee; padding:8px; border-radius:8px; }
+    .quick-buttons button { margin:6px 6px 6px 0; padding:8px 10px; border-radius:8px; border:none; background:#eee; cursor:pointer; }
+    /* Game */
+    #gameArea h3 { margin-top:0; }
+    #options button { display:block; margin:10px auto; padding:10px 12px; width:85%; border-radius:8px; border:none; background:var(--accent); color:#fff; cursor:pointer; }
+    footer { text-align:center; padding:18px 12px; color:var(--muted); font-size:13px; }
+    @media(min-width:700px){ .grid { grid-template-columns: 1fr 380px; } input[type="text"]{ width:65% } }
+  </style>
+</head>
+<body>
+  <header>🔒 SafeLink AI — Prototype (All features)</header>
+
+  <div class="container">
+    <nav>
+      <button onclick="showSection('detector')">Phishing Detector</button>
+      <button onclick="showSection('game')">Mini Game</button>
+      <button onclick="showSection('reports')">Reports & Logs</button>
+    </nav>
+
+    <div class="grid">
+      <!-- MAIN LEFT: Detector or Game content will show here -->
+      <div id="main" class="card">
+        <!-- DETECTOR -->
+        <section id="detectorSection">
+          <div class="slogan">"Think Before You Click — Stay Safe Online!"</div>
+
+          <h2>AI Phishing Detector</h2>
+          <p style="color:var(--muted)">Enter URL or use the mic. Select language for spoken result.</p>
+
+          <div style="margin-bottom:8px;">
+            <input id="urlInput" type="text" placeholder="e.g. https://www.google.com" />
+            <button class="small" onclick="pasteTest('https://www.google.com')">Use</button>
+            <button class="small" onclick="startListen()">🎤</button>
+            <button class="small" onclick="checkLink()">Check</button>
+          </div>
+
+          <div style="margin-bottom:8px;">
+            <label for="langSelect">Speak language:</label>
+            <select id="langSelect">
+              <option value="en">English</option>
+              <option value="hi">Hindi</option>
+              <option value="te">Telugu</option>
+              <option value="ur">Urdu</option>
+            </select>
+            <button class="small" onclick="stopSpeak()">🔇 Stop</button>
+          </div>
+
+          <div id="resultCard" class="card" style="text-align:left; margin-top:8px;">
+            <p id="prediction"><b>Prediction:</b> -</p>
+            <p id="explanation"><b>Explanation:</b> -</p>
+            <div style="margin-top:6px;">
+              <button onclick="reportCurrent()">Report</button>
+              <button onclick="copyResult()">Copy Result</button>
+            </div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <h4>Quick test URLs</h4>
+            <div class="quick-buttons">
+              <button onclick="pasteTest('https://www.google.com')">google.com (safe)</button>
+              <button onclick="pasteTest('https://www.amazon.in')">amazon.in (safe)</button>
+              <button onclick="pasteTest('http://googIe.com.login.verify-account.xyz')">phishy - fake google</button>
+              <button onclick="pasteTest('http://secure-paypal.com.verify-user-update.net')">phishy - paypal</button>
+              <button onclick="pasteTest('http://faceb00k-security-check.tk')">phishy - fb</button>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <h4>Cybersecurity Helpline Numbers</h4>
+            <div class="helpline">
+              <p>📞 India National Cyber Crime Helpline: <b>1930</b></p>
+              <p>📞 CERT-In Helpline: <b>1800-11-4949</b></p>
+              <p>📞 Local Police: <b>100</b> / Emergency</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- GAME -->
+        <section id="gameSection" style="display:none">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>Mini Quiz Game 🎮</h2>
+            <div style="text-align:right; color:var(--muted)">Slogans:<br>"Click Smart, Stay Secure!"</div>
+          </div>
+
+          <div id="gameArea">
+            <div id="question"></div>
+            <div id="options"></div>
+            <p id="feedback" style="font-weight:600"></p>
+            <p id="finalScore"></p>
+
+            <div style="margin-top:8px;">
+              <button onclick="startGame()">Start Game</button>
+              <button onclick="showLeaderboard()">Leaderboard</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT: reports + leaderboard -->
+      <aside class="card">
+        <h3>Reports & Leaderboard</h3>
+
+        <div style="margin-bottom:10px;">
+          <h4>Submit/View Reports</h4>
+          <p style="color:var(--muted); margin:6px 0">Reports are saved locally (demo).</p>
+          <div>
+            <button onclick="openReportForm()">New Report</button>
+            <button onclick="clearReports()">Clear Reports</button>
+          </div>
+          <div class="reports-list" id="reportsList" style="margin-top:8px;"></div>
+        </div>
+
+        <hr>
+
+        <div style="margin-top:10px;">
+          <h4>Leaderboard (Game)</h4>
+          <div class="leaderboard-list" id="leaderboardList"></div>
+          <div style="margin-top:8px;">
+            <button onclick="resetLeaderboard()">Reset LB</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      Prototype for demo / learning — voices use browser Text-to-Speech. Speech recognition may require Chrome & permissions.
+    </footer>
+  </div>
+
+<script>
+/* ---------- Navigation ---------- */
+function showSection(name){
+  document.getElementById('detectorSection').style.display = (name==='detector') ? '' : 'none';
+  document.getElementById('gameSection').style.display = (name==='game') ? '' : 'none';
+  // reports sidebar always visible
+}
+
+/* ---------- Utilities ---------- */
+function pasteTest(url){
+  document.getElementById('urlInput').value = url;
+}
+
+/* ---------- Text-to-Speech ---------- */
+function speakText(text, lang){
+  try {
+    window.speechSynthesis.cancel(); // stop previous
+    let u = new SpeechSynthesisUtterance(text);
+    if(lang === 'hi') u.lang = 'hi-IN';
+    else if(lang === 'te') u.lang = 'te-IN';
+    else if(lang === 'ur') u.lang = 'ur-PK';
+    else u.lang = 'en-US';
+    speechSynthesis.speak(u);
+  } catch(e){
+    console.warn('TTS not supported', e);
+  }
+}
+function stopSpeak(){ try{ speechSynthesis.cancel(); }catch(e){} }
+
+/* ---------- Simple Phishing heuristic + UI ---------- */
+function checkLink(){
+  const url = (document.getElementById('urlInput').value||'').trim();
+  if(!url){
+    alert('Please enter a URL or use mic / quick button');
+    return;
+  }
+  const l = url.toLowerCase();
+  let safe = true;
+  // Basic heuristics for demo
+  const phishyKeywords = ['login', 'verify', 'secure', 'account', 'update', 'free', 'money', 'refund', 'click', 'phish', 'support', 'security-check'];
+  const domainParts = l.split(/[\/:]+/).filter(Boolean);
+  // if lots of dots or suspicious keywords -> mark unsafe
+  if((l.match(/\./g)||[]).length > 4) safe = false;
+  for(const k of phishyKeywords) if(l.includes(k)) safe = false;
+
+  // very safe known list exceptions
+  const safeWhitelist = ['google.com','amazon.in','microsoft.com','facebook.com'];
+  for(const s of safeWhitelist) if(l.includes(s)) safe = true;
+
+  // Prepare messages by language
+  const lang = document.getElementById('langSelect').value;
+  let message = '', expl = '';
+  if(safe){
+    if(lang==='hi'){ message = "✅ आपका लिंक सुरक्षित है, आप इसे इस्तेमाल कर सकते हैं।"; expl = "सुरक्षा संकेत: कोई संदिग्ध शब्द नहीं मिला।"; }
+    else if(lang==='te'){ message = "✅ మీ లింక్ సురక్షితం, మీరు దీన్ని ఉపయోగించవచ్చు."; expl = "సెక్యూరిటీ: అనుమానాస్పద పదాలు కనపడలేదు."; }
+    else if(lang==='ur'){ message = "✅ آپ کا لنک محفوظ ہے، آپ اسے استعمال کر سکتے ہیں۔"; expl = "حفاظتی اشارہ: کوئی مشتبہ لفظ نہیں ملا۔"; }
+    else { message = "✅ Your link is safe. You can use it."; expl = "Security hint: no suspicious keywords detected."; }
+  } else {
+    if(lang==='hi'){ message = "⚠️ यह लिंक असुरक्षित हो सकता है — कृपया सावधान रहें।"; expl = "संदिग्ध शब्द मिले: कृपया लिंक न खोलें।"; }
+    else if(lang==='te'){ message = "⚠️ ఈ లింక్ అనుమానాస్పదం — దయచేసి జాగ్రత్తగా ఉండండి."; expl = "అనుమానాస్పద పదాలు కనబడినవి: లింక్ ని తెరవవద్దు."; }
+    else if(lang==='ur'){ message = "⚠️ یہ لنک مشتبہ ہو سکتا ہے — براہ کرم محتاط رہیں۔"; expl = "مشکوک الفاظ پائے گئے: لنک نہ کھولیں۔"; }
+    else { message = "⚠️ This link may be unsafe — please be cautious."; expl = "Suspicious keywords detected: avoid opening the link."; }
+  }
+
+  document.getElementById('prediction').innerHTML = "<b>Prediction:</b> " + (safe ? "Safe" : "Unsafe");
+  document.getElementById('explanation').innerHTML = "<b>Explanation:</b> " + expl + " <br><b>Message:</b> " + message;
+  speakText((expl + " " + message).replace(/✅|⚠️/g,''), lang);
+}
+
+/* ---------- Speech Recognition for mic input (may require Chrome) ---------- */
+let rec = null;
+function startListen(){
+  const input = document.getElementById('urlInput');
+  // Check webkitSpeechRecognition
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){ alert('Speech recognition not supported in this browser. Use Chrome mobile.'); return; }
+  rec = new SpeechRecognition();
+  rec.lang = 'en-IN'; // allow english + mixed; user can say url in English
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+  rec.onresult = (e) => {
+    const text = e.results[0][0].transcript;
+    // If user said "google dot com" it may be transcribed; try to normalize common words
+    const normalized = normalizeSpokenUrl(text);
+    input.value = normalized;
+  };
+  rec.onerror = (e) => { console.warn('rec error', e); alert('Voice input error: '+ (e.error || e.message)); };
+  rec.start();
+}
+
+// naive normalization: "dot" -> ".", "slash" -> "/", "colon" -> ":" etc.
+function normalizeSpokenUrl(spoken){
+  return spoken.replace(/\s+(dot|point)\s+/ig, '.')
+               .replace(/\s+dot$/i, '.')
+               .replace(/\s+(slash|forward slash)\s+/ig, '/')
+               .replace(/\s+colon\s+/ig, ':')
+               .replace(/\s+/g, '');
+}
+
+/* ---------- REPORTS (localStorage demo) ---------- */
+function openReportForm(){
+  const url = document.getElementById('urlInput').value.trim();
+  const note = prompt('Add a short note about this report (optional):', '');
+  if(url === '') { alert('Enter a URL first or use quick buttons'); return; }
+  const report = { url, note: note||'', time: new Date().toISOString() };
+  const reports = JSON.parse(localStorage.getItem('safereports')||'[]');
+  reports.unshift(report);
+  localStorage.setItem('safereports', JSON.stringify(reports));
+  refreshReports();
+  alert('Report saved locally (demo).');
+}
+function reportCurrent(){ openReportForm(); }
+function refreshReports(){
+  const list = document.getElementById('reportsList'); list.innerHTML = '';
+  const reports = JSON.parse(localStorage.getItem('safereports')||'[]');
+  if(reports.length===0){ list.innerHTML = '<i style="color:var(--muted)">No reports yet.</i>'; return; }
+  reports.forEach((r, idx) => {
+    const el = document.createElement('div');
+    el.style.padding = '6px 0';
+    el.innerHTML = `<b>#${reports.length-idx}</b> <div style="font-size:13px">${r.url}</div>
+      <div style="font-size:12px;color:var(--muted)">${r.note||''} • ${new Date(r.time).toLocaleString()}</div>
+      <div style="margin-top:6px"><button onclick="deleteReport(${idx})">Delete</button></div>`;
+    list.appendChild(el);
+  });
+}
+function deleteReport(index){
+  const reports = JSON.parse(localStorage.getItem('safereports')||'[]');
+  reports.splice(index,1);
+  localStorage.setItem('safereports', JSON.stringify(reports));
+  refreshReports();
+}
+function clearReports(){
+  if(confirm('Clear all saved reports?')){ localStorage.removeItem('safereports'); refreshReports(); }
+}
+
+/* ---------- GAME + LEADERBOARD ---------- */
+const questions = [
+  { q: "Which company created Android?", options:["Apple","Google","Microsoft","Samsung"], a:"Google" },
+  { q: "What is phishing?", options:["A fishing method","A cyber scam to steal info","A sports move","A game"], a:"A cyber scam to steal info" },
+  { q: "Which one is a sign of a phishing URL?", options:["Extra subdomains","Correct domain","Short URL","HTTPS only"], a:"Extra subdomains" },
+  { q: "Which language option does the detector speak?", options:["Only English","Hindi, Telugu, Urdu, English","Only Hindi","Only Urdu"], a:"Hindi, Telugu, Urdu, English" },
+  { q: "Which is a safe practice?", options:["Click unknown links","Open attachments from strangers","Check URL before clicking","Share passwords"], a:"Check URL before clicking" }
+];
+let gIndex=0, gScore=0;
+function startGame(){
+  gIndex=0; gScore=0; document.getElementById('finalScore').innerText=''; document.getElementById('feedback').innerText='';
+  showQuestion();
+}
+function showQuestion(){
+  if(gIndex >= questions.length){
+    document.getElementById('question').innerHTML = "<h3>Game Over 🎉</h3>";
+    document.getElementById('options').innerHTML = '';
+    document.getElementById('finalScore').innerText = `Your score: ${gScore} / ${questions.length}`;
+    saveScorePrompt(gScore);
+    return;
+  }
+  const q = questions[gIndex];
+  document.getElementById('question').innerHTML = `<h3>${q.q}</h3>`;
+  let optsHtml = '';
+  q.options.forEach(o=>{
+    optsHtml += `<button onclick="checkAnswer('${o.replace(/'/g,"\\'")}')">${o}</button>`;
+  });
+  document.getElementById('options').innerHTML = optsHtml;
+}
+function checkAnswer(choice){
+  const correct = questions[gIndex].a;
+  if(choice === correct){ gScore++; document.getElementById('feedback').innerText = '✅ Correct!'; }
+  else { document.getElementById('feedback').innerText = `❌ Wrong! Correct: ${correct}`; }
+  gIndex++;
+  setTimeout(()=>{ document.getElementById('feedback').innerText=''; showQuestion(); }, 900);
+}
+
+/* Leaderboard using localStorage */
+function saveScorePrompt(score){
+  const name = prompt('Enter your name for the leaderboard (or Cancel to skip):','Guest');
+  if(name === null) { showLeaderboard(); return; } // user cancelled
+  const lb = JSON.parse(localStorage.getItem('safeleaderboard')||'[]');
+  lb.push({name: name || 'Guest', score, time: new Date().toISOString()});
+  // sort desc, keep top 10
+  lb.sort((a,b)=>b.score - a.score || (new Date(b.time)-new Date(a.time)));
+  localStorage.setItem('safeleaderboard', JSON.stringify(lb.slice(0,10)));
+  showLeaderboard();
+}
+function showLeaderboard(){
+  const lbDiv = document.getElementById('leaderboardList'); lbDiv.innerHTML = '';
+  const lb = JSON.parse(localStorage.getItem('safeleaderboard')||'[]');
+  if(lb.length===0){ lbDiv.innerHTML = '<i style="color:var(--muted)">No scores yet. Play the game!</i>'; return; }
+  lb.forEach((r,i)=>{
+    const el = document.createElement('div');
+    el.style.padding = '6px 0';
+    el.innerHTML = `<b>${i+1}. ${r.name}</b> — ${r.score} pts <div style="font-size:12px;color:var(--muted)">${new Date(r.time).toLocaleString()}</div>`;
+    lbDiv.appendChild(el);
+  });
+}
+function resetLeaderboard(){ if(confirm('Reset leaderboard?')){ localStorage.removeItem('safeleaderboard'); showLeaderboard(); } }
+
+/* ---------- Misc on load ---------- */
+window.addEventListener('load', ()=>{
+  refreshReports();
+  showLeaderboard();
+  showSection('detector');
+});
+
+/* ---------- Copy result ---------- */
+function copyResult(){
+  const text = document.getElementById('prediction').innerText + '\n' + document.getElementById('explanation').innerText;
+  navigator.clipboard?.writeText(text).then(()=>alert('Copied result to clipboard'), ()=>alert('Copy failed'));
+}
+</script>
+</body>
+</html>
